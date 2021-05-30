@@ -1,33 +1,46 @@
 <template>
-  <h1>{{ msg }}</h1>
-
-  <p>
-    <a href="https://vitejs.dev/guide/features.html" target="_blank">
-      Vite Documentation
-    </a>
-    |
-    <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Documentation</a>
-  </p>
-
-  <button @click="state.count++">count is: {{ state.count }}</button>
-  <p>
-    Edit
-    <code>components/HelloWorld.vue</code> to test hot module replacement.
-  </p>
+  <div>
+    <h1>Frontend</h1>
+    <ul>
+      <li v-for="item in todos" :key="item.id">{{item.deskripsi}} <button @click="hapus(item.id)">x</button></li>
+    </ul>
+    <input v-model="myText"/>
+    <button @click="tambah">Add</button>
+  </div>
 </template>
 
-<script setup>
-import { defineProps, reactive } from 'vue'
+<script>
+import axios from 'axios'
 
-defineProps({
-  msg: String
-})
-
-const state = reactive({ count: 0 })
-</script>
-
-<style scoped>
-a {
-  color: #42b983;
+export default {
+  data: function(){
+    return {
+      todos: [],
+      myText: ''
+    }
+  },
+  created: function(){
+    axios.get('http://localhost:3000/todo')
+    .then((response) => {
+      this.todos = response.data
+    })
+  },
+  methods:{
+    tambah: function(){
+      const newItem = {deskripsi: this.myText}
+      axios.post('http://localhost:3000/todo', newItem)
+      .then(() => {
+        this.todos.push(newItem)
+        window.location.reload()
+      })
+    },
+    hapus: function(id){
+      var index = this.todos.findIndex(obj => obj.id === id)
+      axios.delete(`http://localhost:3000/todo/${id}`)
+      .then(() => {
+        this.todos.splice(index, 1)
+      })
+    }
+  }
 }
-</style>
+</script>
